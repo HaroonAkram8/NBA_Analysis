@@ -3,6 +3,7 @@ import pandas as pd
 from src.sql_db.sql_db_class import nba_psql
 from src.nba_data.seasons import seasons_list
 from src.nba_data.gamelogs import get_gamelogs
+from src.nba_data.elo_rating import generate_elo_ratings, set_init_elo
 from src.utils.private_data_reader import private_data_reader
 from src.globals import (
     PRIVATE_DATA, SQL_CLOUD_INFO, USERNAME_FIELD, PASSWORD_FIELD, SQL_HOST_FIELD, SQL_ADDR_FIELD,
@@ -36,3 +37,13 @@ class data_manager(nba_psql):
         df_gamelogs = get_gamelogs(team_ids=team_ids, seasons=seasons, season_type=season_type)
         
         return self._insert_gamelogs(df_gamelogs=df_gamelogs)
+    
+    def update_elo(self):
+        _, teaminfo = self.get_all_teaminfo()
+        
+        latest_elo_ratings  = set_init_elo(teaminfo=teaminfo['data'])
+        _, games = self._select_games_for_elo()
+
+        elo_ratings = generate_elo_ratings(latest_elo_ratings=latest_elo_ratings, games=games['data'])
+
+        return self._insert_elos(elo_ratings=elo_ratings)

@@ -37,6 +37,8 @@ HEADERS = {'Accept': 'application/json, text/plain, */*',
 # Game constants
 WIN = True
 LOSS = False
+START_ELO_RATING = 1300.0
+H_ELO_BOOST = 100.0
 SEASON_TYPE = "Regular Season"
 
 
