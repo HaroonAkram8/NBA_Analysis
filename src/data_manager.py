@@ -1,10 +1,12 @@
 import pandas as pd
 
 from src.sql_db.sql_db_class import nba_psql
+from src.nba_data.seasons import seasons_list
+from src.nba_data.gamelogs import get_gamelogs
 from src.utils.private_data_reader import private_data_reader
 from src.globals import (
     PRIVATE_DATA, SQL_CLOUD_INFO, USERNAME_FIELD, PASSWORD_FIELD, SQL_HOST_FIELD, SQL_ADDR_FIELD,
-    SQL_PORT, CLOUD_NBA_DB
+    SQL_PORT, CLOUD_NBA_DB, SEASON_TYPE
 )
 
 class data_manager(nba_psql):
@@ -24,3 +26,13 @@ class data_manager(nba_psql):
             teaminfo = pd.DataFrame(teaminfo['data'], columns=teaminfo['columns'])
         
         return success, teaminfo
+    
+    def populate_gamelogs(self, start_season_year: int, end_season_year: int, season_type: str=SEASON_TYPE):
+        _, teaminfo = self.get_all_teaminfo()
+        team_ids = [team[0] for team in teaminfo['data']]
+
+        seasons = seasons_list(start_season_year=start_season_year, end_season_year=end_season_year)
+
+        df_gamelogs = get_gamelogs(team_ids=team_ids, seasons=seasons, season_type=season_type)
+        
+        return self._insert_gamelogs(df_gamelogs=df_gamelogs)
