@@ -1,0 +1,40 @@
+CREATE TABLE IF NOT EXISTS TeamInfo (
+    id INTEGER PRIMARY KEY,
+    abbr VARCHAR(4) UNIQUE NOT NULL,
+    name VARCHAR(30) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Gamelogs (
+    game_id INTEGER NOT NULL,
+    season_year VARCHAR(10) NOT NULL,
+    game_date DATE NOT NULL,
+    team_id INTEGER NOT NULL,
+    elo_rating FLOAT,
+    wl BOOLEAN NOT NULL,
+    at_home BOOLEAN NOT NULL,
+    pts SMALLINT NOT NULL,
+    min SMALLINT NOT NULL,
+    fgm SMALLINT NOT NULL,
+    fga SMALLINT NOT NULL,
+    fg_pct FLOAT NOT NULL,
+    fg3m SMALLINT NOT NULL,
+    fg3a SMALLINT NOT NULL,
+    fg3_pct FLOAT NOT NULL,
+    ftm SMALLINT NOT NULL,
+    fta SMALLINT NOT NULL,
+    ft_pct FLOAT NOT NULL,
+    oreb SMALLINT NOT NULL,
+    dreb SMALLINT NOT NULL,
+    reb SMALLINT NOT NULL,
+    ast SMALLINT NOT NULL,
+    tov SMALLINT NOT NULL,
+    stl SMALLINT NOT NULL,
+    blk SMALLINT NOT NULL,
+    blka SMALLINT NOT NULL,
+    pf SMALLINT NOT NULL,
+    pfd SMALLINT NOT NULL,
+    plus_minus SMALLINT NOT NULL,
+
+    PRIMARY KEY (game_id, team_id),
+    FOREIGN KEY (team_id) REFERENCES TeamInfo(id)
+);
