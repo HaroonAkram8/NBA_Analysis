@@ -86,7 +86,7 @@ class nba_psql:
             
             for i in tqdm(range(0, len(elo_ratings)), desc=f"Setting ELO rating for each game"):
                 game_id, h_team_id, a_team_id, h_elo, a_elo = elo_ratings[i]
-                
+
                 cursor.execute(query, (h_elo, game_id, h_team_id))
                 cursor.execute(query, (a_elo, game_id, a_team_id))
 
@@ -94,3 +94,29 @@ class nba_psql:
             success = True
 
         return success
+    
+    def _select_h2h_elo(self):
+        success = False
+        games = {}
+
+        with self.connection.cursor() as cursor:
+            query = "SELECT g1.season_year, g1.game_date, g1.game_id, g1.team_id AS h_team_id, g2.team_id AS a_team_id, g1.wl AS home_wins, \
+                    ( \
+                        SELECT hg.elo_rating + 100 FROM gamelogs hg WHERE hg.game_date < g1.game_date AND hg.team_id = g1.team_id ORDER BY hg.game_date DESC LIMIT 1 \
+                    ) AS h_elo_rating, \
+                    ( \
+                        SELECT hg.elo_rating FROM gamelogs hg WHERE hg.game_date < g2.game_date AND hg.team_id = g2.team_id ORDER BY hg.game_date DESC LIMIT 1 \
+                    ) AS a_elo_rating \
+                    FROM Gamelogs g1 JOIN Gamelogs g2 \
+                    ON g1.game_id = g2.game_id AND g1.at_home AND NOT g2.at_home \
+                    ORDER BY g1.game_date;"
+            
+            cursor.execute(query)
+
+            games['columns'] = ['season_year', 'game_date', 'game_id', 'h_team_id', 'a_team_id', 'home_wins', 'h_elo_rating', 'a_elo_rating']
+            games['data'] = cursor.fetchall()
+
+            self.connection.commit()
+            success = True
+        
+        return success, games

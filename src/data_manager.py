@@ -47,3 +47,11 @@ class data_manager(nba_psql):
         elo_ratings = generate_elo_ratings(latest_elo_ratings=latest_elo_ratings, games=games['data'])
 
         return self._insert_elos(elo_ratings=elo_ratings)
+    
+    def get_h2h_elo(self, pandas_format: bool=False):
+        success, teaminfo = self._select_h2h_elo()
+
+        if pandas_format and success:
+            teaminfo = pd.DataFrame(teaminfo['data'], columns=teaminfo['columns'])
+        
+        return success, teaminfo
